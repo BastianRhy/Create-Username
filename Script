@@ -3,7 +3,6 @@
 # Import-Module ActiveDirectory wird verwendet, um mit dem Active Directory zu arbeiten
 Import-Module ActiveDirectory
 
-
 # Die Variablen $Vorname und $Nachname werden mit den entsprechenden Variablen im Automation gefüllt
 $Vorname = "$[Vorname]"
 $Nachname = "$[Nachname]"
@@ -16,8 +15,6 @@ $a = 0
 $b = 1
 $c = 1
 $Vollername = $Vorname + " " + $Nachname
-
-
 
 # do while Schlaufe zum kontrollieren ob das Benutzerkürzel schon existiert
 do {
