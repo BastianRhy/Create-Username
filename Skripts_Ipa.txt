@@ -1,0 +1,105 @@
+#benutzername erstellen
+
+# Import-Module ActiveDirectory wird verwendet, um mit dem Active Directory zu arbeiten
+Import-Module ActiveDirectory
+
+
+# Die Variablen $Vorname und $Nachname werden mit den entsprechenden Variablen im Automation gefüllt
+$Vorname = "$[Vorname]"
+$Nachname = "$[Nachname]"
+
+# Erstellung des Benutzernamens / Kürzels. Die Variable VornameK soll den erstenbuchstabens des
+#Vornamens nehmen. Der VornameK muss nicht im loop sein da dieser laut den vorgaben gleich bleibt
+$VornameB = $Vorname.Substring(0, 1)
+# c wird die Variable sein, die im loop ist falls der Benutzername schon vorhanden ist. Da sich nur der 3. Buchstabe verändert wird
+$a = 0
+$b = 1
+$c = 1
+$Vollername = $Vorname + " " + $Nachname
+
+
+
+# do while Schlaufe zum kontrollieren ob das Benutzerkürzel schon existiert
+do {
+$NachnameB = $Nachname.Substring($a, $b) + $Nachname.Substring($c, $b)
+$Benutzername = "$VornameB$NachnameB"
+$c++
+# Kontrollieren ob AD benutzer schon existiert.
+try {$ADBenutzer = Get-ADUser -Identity $Benutzername}
+catch {$ADBenutzer = $null
+}
+}while ($null -ne $ADBenutzer);
+Write-Output $Benutzername
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+#Password erstellen
+
+#Dieser generitert eine zufälligen Zeichenfolge
+function Get-RandomCharacters($length, $characters) {
+# Dieser erstellt ein Array von zufälligen ganzen Zahlen, die im Bereich von 1 bis zur Länge der Zeichenfolge liegen
+    $zufall = 1..$length | ForEach-Object { Get-Random -Maximum $characters.length }
+# Dieser wird gbraucht damit keine leerzeichen entstehen
+    $private:ofs=""
+    return [String]$characters[$zufall]
+}
+# hier werden alle Zeichen die verwendet werden züfällig gewählt und vermischt
+function Scramble-String([string]$eingabe){     
+    $zeichenreihe = $eingabe.ToCharArray()   
+    $scrambledStringArray = $zeichenreihe | Get-Random -Count $zeichenreihe.Length     
+    $ausgabe = -join $scrambledStringArray
+    return $ausgabe 
+}
+# hier werden die zeichen aufgeschrieben die für das setzten des Passwords gewählt werden.
+$password = Get-RandomCharacters -length 5 -characters 'abcdefghiklmnoprstuvwxyz'
+$password += Get-RandomCharacters -length 2 -characters 'ABCDEFGHKLMNOPRSTUVWXYZ'
+$password += Get-RandomCharacters -length 2 -characters '1234567890'
+$password += Get-RandomCharacters -length 1 -characters '!"§$%&/()=?}][{@#*+'
+
+# hier wird das password wieder vermischt ansonsten würde dieser in reihenfolge aufgezeigt sein
+$password = Scramble-String $password
+
+# hier wird das Passwort der Variable dan an "OnPasswort" zugewiesen
+Write-Output $password
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#Onboarding Start Datum Formatieren
+
+# Hier wird der mitgegebener Datum auf ein anderes Format ausgegeben 10:00 wurde hier als 
+# Zeit angegeben welcher am folgenden Tag gestartet werden soll
+$OnStart = (Get-Date "$[On-EintrittsDatum] 10:00").AddDays(-2).ToString("yyyyMMddHHmm")
+# der output welche dann an den Identity Director mitgegebne wird
+Write-Output $OnStart
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+#Offboarding Start Datum Formatieren
+
+# Hier wird der mitgegebener Datum auf ein anderes Format ausgegeben 18:00 wurde hier als 
+# Zeit angegeben welcher am folgenden Tag gestartet werden soll
+$OffStart = (Get-Date "$[Off-AustrittsDatum] 18:00").AddDays(0).ToString("yyyyMMddHHmm")
+# der output welche dann an den Identity Director mitgegebne wird
+Write-Output $OffStart
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Das Verpacken des archivierten Profilordners
+
+# Dieser kopiert den Ordner auf dem gleichen Pfad aber verpackt.
+$benutzername = $[Benutzername]
+Compress-Archive -Path 'D:\Offboarding\$benutzername'-DestinationPath 'D:\Offboarding\$benutzername.zip'
+# Dieser schritt löscht denn noch bestehenden ordner der nicht mehr gebraucht wird. force wurde 
+# gebraucht aus eigenen erfahrungen. wurde aber nicht getestet ob es ohne auch gehen würde recurse 
+# wird gebraucht um auch die unterordner zu löschen
+Remove-Item 'D:\Offboarding\$benutzername' -force -Recurse
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
