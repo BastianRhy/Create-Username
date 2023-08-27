@@ -13,7 +13,7 @@ $VornameB = $Vorname.Substring(0, 1)
 # c wird die Variable sein, die im loop ist falls der Benutzername schon vorhanden ist. Da sich nur der 3. Buchstabe verändert wird
 $a = 0
 $b = 1
-$c = 1
+$c = 2
 $Vollername = $Vorname + " " + $Nachname
 
 # do while Schlaufe zum kontrollieren ob das Benutzerkürzel schon existiert
