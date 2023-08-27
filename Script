@@ -1,0 +1,32 @@
+#benutzername erstellen
+
+# Import-Module ActiveDirectory wird verwendet, um mit dem Active Directory zu arbeiten
+Import-Module ActiveDirectory
+
+
+# Die Variablen $Vorname und $Nachname werden mit den entsprechenden Variablen im Automation gefüllt
+$Vorname = "$[Vorname]"
+$Nachname = "$[Nachname]"
+
+# Erstellung des Benutzernamens / Kürzels. Die Variable VornameK soll den erstenbuchstabens des
+#Vornamens nehmen. Der VornameK muss nicht im loop sein da dieser laut den vorgaben gleich bleibt
+$VornameB = $Vorname.Substring(0, 1)
+# c wird die Variable sein, die im loop ist falls der Benutzername schon vorhanden ist. Da sich nur der 3. Buchstabe verändert wird
+$a = 0
+$b = 1
+$c = 1
+$Vollername = $Vorname + " " + $Nachname
+
+
+
+# do while Schlaufe zum kontrollieren ob das Benutzerkürzel schon existiert
+do {
+$NachnameB = $Nachname.Substring($a, $b) + $Nachname.Substring($c, $b)
+$Benutzername = "$VornameB$NachnameB"
+$c++
+# Kontrollieren ob AD benutzer schon existiert.
+try {$ADBenutzer = Get-ADUser -Identity $Benutzername}
+catch {$ADBenutzer = $null
+}
+}while ($null -ne $ADBenutzer);
+Write-Output $Benutzername
